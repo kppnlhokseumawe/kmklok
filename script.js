@@ -1,6 +1,6 @@
 document.getElementById('searchButton').addEventListener('click', function() {
     const searchQuery = document.getElementById('searchInput').value;
-    const apiKey = 'AIzaSyBQ3haOnOyZ12o8Qi4XCbk9YT7QChezFug'; // Ganti dengan API key Anda
+    const apiKey = ''; // Ganti dengan API key Anda
     const url = `https://www.googleapis.com/drive/v3/files?q=name contains '${searchQuery}' and trashed=false&key=${apiKey}`;
 
     fetch(url)
