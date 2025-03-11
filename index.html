@@ -1,18 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KM Klok Search</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Absensi</title>
 </head>
 <body>
-    <div class="container">
-        <h1>KM Klok Search</h1>
-        <input type="text" id="searchInput" placeholder="Enter file name...">
-        <button id="searchButton">Search</button>
-        <div id="results"></div>
-    </div>
-    <script src="script.js"></script>
+    <h2>Absensi Kehadiran</h2>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button id="capture">Ambil Foto</button>
+    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+    <p id="location"></p>
+    <button id="submit">Kirim Absensi</button>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('capture');
+        const submitButton = document.getElementById('submit');
+        const locationDisplay = document.getElementById('location');
+        let latitude, longitude, imageData;
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { console.error("Akses kamera ditolak!", err); });
+
+        captureButton.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            imageData = canvas.toDataURL('image/png');
+        });
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+                locationDisplay.innerText = `Lokasi: ${latitude}, ${longitude}`;
+            }, err => {
+                console.error("Gagal mendapatkan lokasi!", err);
+            });
+        }
+
+        submitButton.addEventListener('click', () => {
+            const timestamp = new Date().toISOString();
+            const data = {
+                latitude: latitude,
+                longitude: longitude,
+                timestamp: timestamp,
+                image: imageData
+            };
+
+            fetch('https://your-backend-url.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => console.log("Data terkirim:", result))
+            .catch(error => console.error("Error saat mengirim data:", error));
+        });
+    </script>
 </body>
 </html>
